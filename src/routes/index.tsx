@@ -10,20 +10,26 @@ import { BannerNew, BannerTile } from "@/components/heroes/banner-tile";
 
 import ProductCard from "@/components/product/product-card";
 import { Button } from "@/components/ui/button";
-import { searchProducts } from "@/integrations/trpc/products/product-service";
+import { useQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/integrations/trpc/react";
 
 export const Route = createFileRoute("/")({
   component: App,
-  loader: async () =>
-    await searchProducts({
-      sort: "newest",
-      skip: 0,
-      take: 15,
-    }),
+  loader: async ({ context }) => {
+    return await context.queryClient.prefetchQuery(
+      context.trpc.products.list.queryOptions({
+        sort: "newest",
+        take: 15,
+      })
+    );
+  },
 });
 
 function App() {
-  const newProducts = Route.useLoaderData();
+  const trpc = useTRPC();
+  const { data: newProducts } = useQuery(
+    trpc.products.list.queryOptions({ sort: "newest", take: 15 })
+  );
 
   return (
     <main className="container mx-auto px-4 py-12 sm:px-6 lg:px-8">
@@ -125,16 +131,18 @@ function App() {
         <h3 className="text-lg font-bold lg:text-2xl xl:text-4xl">
           New Products
         </h3>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
-          {newProducts.map((product) => {
-            return (
-              <ProductCard
-                product={product}
-                key={product.id}
-              />
-            );
-          })}
-        </div>
+        {newProducts && (
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-5">
+            {newProducts.map((product) => {
+              return (
+                <ProductCard
+                  product={product}
+                  key={product.id}
+                />
+              );
+            })}
+          </div>
+        )}
         <div className="flex items-center justify-center">
           <Button asChild>
             <Link to="/">View more</Link>
