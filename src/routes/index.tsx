@@ -14,7 +14,6 @@ import { searchProducts } from "@/integrations/trpc/products/product-service";
 
 export const Route = createFileRoute("/")({
   component: App,
-  ssr: "data-only",
   loader: async () =>
     await searchProducts({
       sort: "newest",
