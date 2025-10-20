@@ -10,17 +10,17 @@ import { BannerNew, BannerTile } from "@/components/heroes/banner-tile";
 
 import ProductCard from "@/components/product/product-card";
 import { Button } from "@/components/ui/button";
+import { searchProducts } from "@/integrations/trpc/products/product-service";
 
 export const Route = createFileRoute("/")({
   component: App,
-  loader: async ({ context }) => {
-    return await context.queryClient.fetchQuery(
-      context.trpc.products.list.queryOptions({
-        sort: "newest",
-        take: 15,
-      })
-    );
-  },
+  ssr: "data-only",
+  loader: async () =>
+    await searchProducts({
+      sort: "newest",
+      skip: 0,
+      take: 15,
+    }),
 });
 
 function App() {
