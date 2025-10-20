@@ -1,23 +1,22 @@
 import { z } from 'zod'
-
+import { prisma } from 'prisma/db'
 import { createTRPCRouter, publicProcedure } from './init'
 
 import type { TRPCRouterRecord } from '@trpc/server'
 
-const todos = [
-  { id: 1, name: 'Get groceries' },
-  { id: 2, name: 'Buy a new phone' },
-  { id: 3, name: 'Finish the project' },
-]
-
 const todosRouter = {
-  list: publicProcedure.query(() => todos),
+  list: publicProcedure.query(async () => {
+    return await prisma.posts.findMany()
+  }),
   add: publicProcedure
     .input(z.object({ name: z.string() }))
-    .mutation(({ input }) => {
-      const newTodo = { id: todos.length + 1, name: input.name }
-      todos.push(newTodo)
-      return newTodo
+    .mutation(async ({ input }) => {
+      return await prisma.posts.create({
+        data: {
+          name: input.name,
+          id: Date.now().toString(),
+        },
+      })
     }),
 } satisfies TRPCRouterRecord
 
