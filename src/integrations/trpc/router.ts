@@ -1,12 +1,13 @@
-import { z } from 'zod'
-import { prisma } from 'prisma/db'
-import { createTRPCRouter, publicProcedure } from './init'
+import { z } from "zod";
+import { prisma } from "prisma/db";
+import { createTRPCRouter, publicProcedure } from "./init";
 
-import type { TRPCRouterRecord } from '@trpc/server'
+import type { TRPCRouterRecord } from "@trpc/server";
+import { productRouter } from "./products/product-route";
 
 const todosRouter = {
   list: publicProcedure.query(async () => {
-    return await prisma.posts.findMany()
+    return await prisma.posts.findMany();
   }),
   add: publicProcedure
     .input(z.object({ name: z.string() }))
@@ -16,11 +17,12 @@ const todosRouter = {
           name: input.name,
           id: Date.now().toString(),
         },
-      })
+      });
     }),
-} satisfies TRPCRouterRecord
+} satisfies TRPCRouterRecord;
 
 export const trpcRouter = createTRPCRouter({
   todos: todosRouter,
-})
-export type TRPCRouter = typeof trpcRouter
+  products: productRouter,
+});
+export type TRPCRouter = typeof trpcRouter;
